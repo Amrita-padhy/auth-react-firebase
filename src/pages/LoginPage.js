@@ -1,49 +1,77 @@
 import React, { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useHistory, useLocation ,useNavigate} from 'react-router-dom'
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 import GoogleIcon from '@mui/icons-material/Google';
+import { useAuth } from "../context/auth-context";
+
+
 
 
 
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { signInWithGoogle,login } = useAuth();
+
   return (
     <div className="main">
-      <div className="login_form">
+      <form className="login_form" noValidate
+          autoComplete="off"
+          onSubmit={ e => {
+            e.preventDefault();
+            // console.log(email,password);
+            if (!email || !password) {
+              <Alert severity="error">Credentials not valid.</Alert>
+            }
+            setIsSubmitting(true)
+            login(email,password)
+        
+            .then(response =>{
+              console.log(response)
+              navigate("/profile-page")
+            })
+            .catch(error => {
+              console.log(error.message)
+            })
+              
+          }}
+          
+          >
       <div className="form_name">
         Login
           </div>
-
-        <Box
-          component="form"
-          sx={{
-            "& > :not(style)": { m: 1 },
-          }}
-          noValidate
-          autoComplete="off"
-        >
           <TextField
             fullWidth
             margin="dense"
-            id="outlined-basic"
+            type="email"
+            name="email"
             label="Email address"
             variant="outlined"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
 
           <TextField
             fullWidth
             margin="dense"
-            id="outlined-basic"
+            type="Password"
+            name="Password"
             label="Password"
             variant="outlined"
             required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
 
           <Button
+          type="submit"
             variant="contained"
             fullWidth
             margin="dense"
@@ -73,10 +101,18 @@ const LoginPage = () => {
           fullWidth
             margin="dense"
             color="secondary"
+            onClick={() =>
+              signInWithGoogle()
+                .then(user => {
+                  // handleRedirectToOrBack()
+                  console.log(user)
+                })
+                .catch(e => console.log(e.message))
+            }
           >Sign in with Goggle</Button>
           </div>
-        </Box>
-      </div>
+        
+      </form>
     </div>
   );
 };
